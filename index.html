@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فارس المساعيد | Intelligence Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700&family=Fira+Code:wght@400&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --mint: #6fffd4;
+            --dark-card: #0d0d0d;
+            --border: rgba(111, 255, 212, 0.1);
+            --bg: #050505;
+            --tg-glow: rgba(0, 136, 204, 0.6);
+            --ig-glow: rgba(225, 48, 108, 0.6);
+            --danger: #ff4b4b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            overflow: hidden;
+        }
+
+        /* زر التدمير في الزاوية اليسرى العليا */
+        @keyframes danger-glow { 0%, 100% { box-shadow: 0 0 5px #400; border-color: #400; } 50% { box-shadow: 0 0 20px var(--danger); border-color: var(--danger); } }
+        .destruct-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-family: 'Fira Code';
+            font-size: 0.6rem;
+            cursor: pointer;
+            animation: danger-glow 1.5s infinite ease-in-out;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+        }
+        .destruct-btn:hover { background: var(--danger); color: #fff; transform: scale(1.05); }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 140px);
+            gap: 15px;
+            max-width: 950px;
+            width: 100%;
+            perspective: 1000px;
+        }
+
+        .bento-item {
+            background: var(--dark-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .bento-item:hover { border-color: var(--mint); transform: translateY(-5px); }
+
+        .profile { grid-column: span 2; grid-row: span 2; }
+        .profile img { width: 65px; height: 65px; border-radius: 18px; border: 1px solid var(--mint); margin-bottom: 15px; }
+        
+        .github-box { grid-column: span 2; grid-row: span 2; justify-content: flex-start; }
+        .cv-box { grid-column: span 2; grid-row: span 1; cursor: pointer; background: linear-gradient(135deg, #0d0d0d, #1a1a1a); border: 1px dashed var(--mint); }
+        .info-box { grid-column: span 1; grid-row: span 1; align-items: center; }
+        .social { grid-column: span 1; grid-row: span 1; align-items: center; justify-content: center; text-decoration: none; }
+
+        .name { font-size: 1.6rem; font-weight: 700; }
+        .username { color: var(--mint); font-family: 'Fira Code', monospace; font-size: 0.75rem; }
+        .label { font-size: 0.6rem; color: #555; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; display: block; }
+        .big-val { font-size: 1.4rem; font-weight: 700; }
+
+        /* التوهج المستمر */
+        @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 2px var(--glow-color)); } 50% { filter: drop-shadow(0 0 12px var(--glow-color)); } }
+        .tg-icon { color: #0088cc; --glow-color: var(--tg-glow); animation: pulse-glow 2s infinite; font-size: 2.2rem; }
+        .ig-icon { color: #e1306c; --glow-color: var(--ig-glow); animation: pulse-glow 2s infinite; font-size: 2.2rem; }
+
+        /* نافذة السيرة الذاتية */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 3000; justify-content: center; align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .modal-content {
+            background: #0d0d0d; border: 1px solid var(--mint); padding: 40px;
+            border-radius: 30px; max-width: 600px; width: 90%; text-align: right;
+            max-height: 80vh; overflow-y: auto; position: relative;
+        }
+        .close-btn { position: absolute; top: 20px; left: 20px; color: var(--mint); cursor: pointer; font-size: 1.5rem; }
+        .cv-title { font-family: 'Amiri', serif; font-size: 2rem; color: var(--mint); margin-bottom: 15px; }
+        .typewriter-text { line-height: 1.8; color: #ccc; min-height: 100px; }
+        .gaza-section { background: rgba(255, 255, 255, 0.03); border-right: 4px solid #00582e; padding: 15px; margin-top: 25px; border-radius: 0 10px 10px 0; display: none; }
+
+        /* أنيميشن التدمير */
+        .disintegrate { animation: fallAway 1.5s forwards ease-in; pointer-events: none; }
+        @keyframes fallAway { 100% { transform: translateZ(-1000px) translateY(500px) rotateX(70deg); opacity: 0; } }
+
+        @media (max-width: 800px) {
+            .bento-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: auto; }
+            .profile, .github-box, .cv-box { grid-column: span 2; }
+            .destruct-btn { top: 10px; left: 10px; padding: 6px 12px; font-size: 0.5rem; }
+        }
+    </style>
+</head>
+<body id="body">
+
+    <button class="destruct-btn" onclick="destroySystem()">[ Purge System ]</button>
+
+    <div class="bento-grid" id="grid">
+        <div class="bento-item profile">
+            <img src="sy.jpg" alt="Fares">
+            <div class="name">فارس المساعيد</div>
+            <div class="username">> @fares_almsaed</div>
+        </div>
+
+        <div class="bento-item github-box">
+            <span class="label"><i class="fab fa-github"></i> GitHub Projects</span>
+            <div style="font-size: 0.8rem; margin-top: 10px;">
+                <p style="color:var(--mint)">• Tracker Tool | أداة تعقب</p>
+                <p style="color:var(--mint); margin: 8px 0;">• Account Gen | منشئ حسابات</p>
+                <p style="color:var(--mint)">• Exploit Suite | حزمة اختراق</p>
+            </div>
+        </div>
+
+        <div class="bento-item cv-box" onclick="openCV()">
+            <span class="label">Identity & Story</span>
+            <div class="big-val" style="color:var(--mint)">انقر لرؤية السيرة الذاتية <i class="fas fa-heart" style="color:#ff4b4b;"></i></div>
+            <p style="font-size: 0.65rem; color: #666; margin-top: 5px;">ولادةُ دمشق.. وفخرُ المفرق</p>
+        </div>
+
+        <div class="bento-item info-box">
+            <span class="label">Age</span>
+            <div class="big-val">18</div>
+        </div>
+
+        <div class="bento-item info-box">
+            <span class="label">Location</span>
+            <div class="big-val">Jordan</div>
+            <span style="color:var(--mint); font-size: 0.65rem;">Almafraq</span>
+        </div>
+
+        <a href="https://t.me/XS5_X" target="_blank" class="bento-item social"><i class="fab fa-telegram tg-icon"></i></a>
+        <a href="https://instagram.com/gpz.l" target="_blank" class="bento-item social"><i class="fab fa-instagram ig-icon"></i></a>
+    </div>
+
+    <div id="cvModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeCV()">&times;</span>
+            <h2 class="cv-title">أنا فارس المساعيد..</h2>
+            <div id="typed-text" class="typewriter-text"></div>
+            <div id="gaza" class="gaza-section">
+                <h3 style="color:#ff4b4b; margin-bottom:10px; font-family: 'Amiri';">وعن غزة..</h3>
+                غزة ليست مجرد بقعة على الخارطة، هي نبضُ الكرامة في عروقنا. نحن نبرمج للمستقبل، وهم بصمودهم يصنعون التاريخ. <br>
+                <strong style="color:var(--mint)">اللهم انصر غزة وأهلها.</strong>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const bioText = "أنا لست مجرد أكواد برمجية، أنا ثمانية عشر عاماً من البحث عن الثغرات في هذا العالم الرقمي. ولدتُ في قلب الياسمين «دمشق»، وحملتُ شغفي بالأمن السيبراني ليكون درعاً لي هنا في الأردن، وتحديداً في المفرق. أؤمن أن البرمجة ليست وظيفة، بل هي لغة نغير بها الواقع. أسعى دائماً لترك أثرٍ لا يزول.";
+
+        function openCV() {
+            document.getElementById('cvModal').style.display = 'flex';
+            document.getElementById('typed-text').innerHTML = "";
+            document.getElementById('gaza').style.display = 'none';
+            typeWriter(bioText, 0);
+        }
+
+        function typeWriter(text, i) {
+            if (i < text.length) {
+                document.getElementById('typed-text').innerHTML += text.charAt(i);
+                setTimeout(() => typeWriter(text, i + 1), 30);
+            } else {
+                document.getElementById('gaza').style.display = 'block';
+            }
+        }
+
+        function closeCV() { document.getElementById('cvModal').style.display = 'none'; }
+
+        function destroySystem() {
+            if(confirm("DANGER: Execute Purge Protocol?")) {
+                const btn = document.querySelector('.destruct-btn');
+                btn.style.display = 'none';
+                const items = document.querySelectorAll('.bento-item');
+                items.forEach((item, index) => {
+                    setTimeout(() => item.classList.add('disintegrate'), index * 100);
+                });
+                setTimeout(() => {
+                    document.body.innerHTML = "<h1 style='color:white; font-family:Fira Code; text-align:center;'>SYSTEM_OFFLINE</h1>";
+                    document.body.style.backgroundColor = "#000";
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>
